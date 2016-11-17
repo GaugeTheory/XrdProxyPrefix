@@ -19,7 +19,6 @@ XrdVERSIONINFO(XrdClGetPlugIn, ProxyPrefix);
 namespace ProxyPrefix {
 enum Mode { Local, Default, Undefined };
 class ProxyPrefixFile : public XrdCl::FilePlugIn {
-
   private:
     static std::string proxyPrefix;
     XrdCl::File xfile;
@@ -90,36 +89,41 @@ std::string ProxyPrefixFile::proxyPrefix = "UNSET";
 class ProxyPrefixFs : public XrdCl::FileSystemPlugIn {
   private:
     static string proxyPrefix;
+    static XrdCl::URL targetURL;
+    static int level;
+    int mylevel;
 
   public:
-    std::string originalURL;
     XrdCl::FileSystem xfs;
 
-    std::string getProxyDecor() {
+    std::string getProxyDecor(std::string path) {
         XrdCl::Log* log = XrdCl::DefaultEnv::GetLog();
         log->Debug(1, "ProxyPrefixFs::ProxyDecor");
-        XrdCl::URL xURL(originalURL);
+        XrdCl::URL xURL(path);
         char buffer[2048];
         snprintf(buffer, 2048, "%s://%s", xURL.GetProtocol().c_str(), proxyPrefix.c_str());
-        log->Debug(1, buffer);
-        log->Debug(1, "ProxyPrefixFs::ProxyDecorEND");
         return buffer;
     }
-    std::string prepURL(std::string toadd) {
+    std::string prepURL(std::string path) {
         XrdCl::Log* log = XrdCl::DefaultEnv::GetLog();
-        XrdCl::URL xURL(originalURL);
+        XrdCl::URL xURL(path);
         char buffer[2048];
-        snprintf(buffer, 2048, "/%s://%s/", xURL.GetProtocol().c_str(), xURL.GetHostId().c_str());
-        log->Debug(1, "ProxyPrefixFs::prepURL");
-        log->Debug(1, buffer);
-        log->Debug(1, "ProxyPrefixFs::prepURLEN");
+        snprintf(buffer, 2048, "/%s://%s/", targetURL.GetProtocol().c_str(),
+                 targetURL.GetHostId().c_str());
         return buffer;
     }
 
     static void setProxyPrefix(std::string toProxyPrefix) { proxyPrefix = toProxyPrefix; }
-    ProxyPrefixFs(std::string url) : originalURL(url), xfs(getProxyDecor(), false) {
+
+    ProxyPrefixFs(std::string url) : xfs((level == 0) ? getProxyDecor(url) : url, false) {
         XrdCl::Log* log = XrdCl::DefaultEnv::GetLog();
         log->Debug(1, "ProxyPrefixFs::ProxyPrefixFs");
+        if (level == 0) {
+            log->Debug(1, "Setting targetURL");
+            targetURL = XrdCl::URL(url);
+        }
+        mylevel = level;
+        level++;
     }
 
     ~ProxyPrefixFs() {}
@@ -128,8 +132,9 @@ class ProxyPrefixFs : public XrdCl::FileSystemPlugIn {
                                 ResponseHandler* handler, uint16_t timeout) {
         XrdCl::Log* log = XrdCl::DefaultEnv::GetLog();
         log->Debug(1, "ProxyPrefixFs::Locate");
-        log->Debug(1, prepURL(path).c_str());
-        return xfs.Locate(prepURL(path), flags, handler, timeout);
+        if (mylevel == 0)
+            return xfs.Locate(prepURL(path), flags, handler, timeout);
+        return xfs.Locate(path, flags, handler, timeout);
     }
     virtual XRootDStatus Query(QueryCode::Code queryCode, const Buffer& arg,
                                ResponseHandler* handler, uint16_t timeout) {
@@ -142,18 +147,23 @@ class ProxyPrefixFs : public XrdCl::FileSystemPlugIn {
                                  ResponseHandler* handler, uint16_t timeout) {
         XrdCl::Log* log = DefaultEnv::GetLog();
         log->Debug(1, "ProxyPrefixFs::Dirlist");
+        if (mylevel == 0)
+            return xfs.DirList(prepURL(path), flags, handler, timeout);
         return xfs.DirList(prepURL(path), flags, handler, timeout);
     }
 
     virtual XRootDStatus Stat(const std::string& path, ResponseHandler* handler, uint16_t timeout) {
         XrdCl::Log* log = DefaultEnv::GetLog();
         log->Debug(1, "ProxyPrefixFs::Stat");
-        log->Debug(1, prepURL(path).c_str());
-        return xfs.Stat(prepURL(path), handler, timeout);
+        if (mylevel == 0)
+            return xfs.Stat(prepURL(path), handler, timeout);
+        return xfs.Stat(path, handler, timeout);
     }
 };
 
+int ProxyPrefixFs::level = 0;
 std::string ProxyPrefixFs::proxyPrefix = "UNSET";
+XrdCl::URL ProxyPrefixFs::targetURL;
 }
 namespace PPFactory {
 
