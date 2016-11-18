@@ -137,48 +137,47 @@ class ProxyPrefixFs : public XrdCl::FileSystemPlugIn {
             return xfs.Locate(prepURL(path), flags, handler, timeout);
         return xfs.Locate(path, flags, handler, timeout);
     }
-    virtual XRootDStatus Truncate(const std::string& path, uint64_t size,
-                                ResponseHandler* handler, uint16_t timeout) {
+    virtual XRootDStatus Truncate(const std::string& path, uint64_t size, ResponseHandler* handler,
+                                  uint16_t timeout) {
         XrdCl::Log* log = XrdCl::DefaultEnv::GetLog();
         log->Debug(1, "ProxyPrefixFs::Truncate");
         if (mylevel == 0)
             return xfs.Truncate(prepURL(path), size, handler, timeout);
         return xfs.Truncate(path, size, handler, timeout);
     }
-    virtual XRootDStatus Rm(const std::string& path,
-                                ResponseHandler* handler, uint16_t timeout) {
+    virtual XRootDStatus Rm(const std::string& path, ResponseHandler* handler, uint16_t timeout) {
         XrdCl::Log* log = XrdCl::DefaultEnv::GetLog();
         log->Debug(1, "ProxyPrefixFs::Rm");
         if (mylevel == 0)
-            return xfs.Rm(prepURL(path),  handler, timeout);
+            return xfs.Rm(prepURL(path), handler, timeout);
         return xfs.Rm(path, handler, timeout);
     }
     virtual XRootDStatus MkDir(const std::string& path, MkDirdags::Flags flags, Access::Mode mode,
-                                ResponseHandler* handler, uint16_t timeout) {
+                               ResponseHandler* handler, uint16_t timeout) {
         XrdCl::Log* log = XrdCl::DefaultEnv::GetLog();
         log->Debug(1, "ProxyPrefixFs::MkDir");
         if (mylevel == 0)
             return xfs.MkDir(prepURL(path), flags, mode, handler, timeout);
         return xfs.MkDir(path, flags, mode, handler, timeout);
     }
-    virtual XRootDStatus RmDir(const std::string& path,
-                                ResponseHandler* handler, uint16_t timeout) {
+    virtual XRootDStatus RmDir(const std::string& path, ResponseHandler* handler,
+                               uint16_t timeout) {
         XrdCl::Log* log = XrdCl::DefaultEnv::GetLog();
         log->Debug(1, "ProxyPrefixFs::RmDir");
         if (mylevel == 0)
-            return xfs.RmDir(prepURL(path),  handler, timeout);
+            return xfs.RmDir(prepURL(path), handler, timeout);
         return xfs.RmDir(path, handler, timeout);
     }
-    virtual XRootDStatus ChMod(const std::string& path, Access::Mode mode,
-                                ResponseHandler* handler, uint16_t timeout) {
+    virtual XRootDStatus ChMod(const std::string& path, Access::Mode mode, ResponseHandler* handler,
+                               uint16_t timeout) {
         XrdCl::Log* log = XrdCl::DefaultEnv::GetLog();
         log->Debug(1, "ProxyPrefixFs::ChMod");
         if (mylevel == 0)
-            return xfs.ChMod(prepURL(path), mode,  handler, timeout);
+            return xfs.ChMod(prepURL(path), mode, handler, timeout);
         return xfs.ChMod(path, mode, handler, timeout);
     }
 
-    virtual XRootDStatus Ping( ResponseHandler* handler, uint16_t timeout) {
+    virtual XRootDStatus Ping(ResponseHandler* handler, uint16_t timeout) {
         XrdCl::Log* log = XrdCl::DefaultEnv::GetLog();
         log->Debug(1, "ProxyPrefixFs::Ping");
         return xfs.Ping(handler, timeout);
@@ -206,34 +205,36 @@ class ProxyPrefixFs : public XrdCl::FileSystemPlugIn {
             return xfs.Stat(prepURL(path), handler, timeout);
         return xfs.Stat(path, handler, timeout);
     }
-    virtual XRootDStatus StatVFS(const std::string& path,
-                                ResponseHandler* handler, uint16_t timeout) {
+    virtual XRootDStatus StatVFS(const std::string& path, ResponseHandler* handler,
+                                 uint16_t timeout) {
         XrdCl::Log* log = XrdCl::DefaultEnv::GetLog();
         log->Debug(1, "ProxyPrefixFs::StatVFS");
         if (mylevel == 0)
-            return xfs.StatVFS(prepURL(path),  handler, timeout);
+            return xfs.StatVFS(prepURL(path), handler, timeout);
         return xfs.StatVFS(path, handler, timeout);
     }
-    virtual XRootDStatus Protocol(
-                                ResponseHandler* handler, uint16_t timeout) {
+    virtual XRootDStatus Protocol(ResponseHandler* handler, uint16_t timeout) {
         XrdCl::Log* log = XrdCl::DefaultEnv::GetLog();
         log->Debug(1, "ProxyPrefixFs::Protocol");
         return xfs.Protocol(handler, timeout);
     }
-     virtual XRootDStatus Prepare( const std::vector<std::string> &fileList,
-                                    PrepareFlags::Flags             flags,
-                                    uint8_t                         priority,
-                                    ResponseHandler                *handler,
-                                    uint16_t                        timeout )
-      {
-        if (mylevel == 0){
-	std::vector<std::string> newList;
-	for(auto it:fileList) newList.pushback(prepURL(it)) ;
-	return xfs.Prepare(newList,flags,priority,handler,timeout);
-	}
-	return xfs.Prepare(fileList,flags,priority,handler,timeout);
-      }
-
+    virtual XRootDStatus SendInfo(const std::string& info, ResponseHandler* handler,
+                                  uint16_t timeout) {
+        XrdCl::Log* log = XrdCl::DefaultEnv::GetLog();
+        log->Debug(1, "ProxyPrefixFs::Protocol");
+        return xfs.SendInfo(info, handler, timeout);
+    }
+    virtual XRootDStatus Prepare(const std::vector<std::string>& fileList,
+                                 PrepareFlags::Flags flags, uint8_t priority,
+                                 ResponseHandler* handler, uint16_t timeout) {
+        if (mylevel == 0) {
+            std::vector<std::string> newList;
+            for (auto it : fileList)
+                newList.pushback(prepURL(it));
+            return xfs.Prepare(newList, flags, priority, handler, timeout);
+        }
+        return xfs.Prepare(fileList, flags, priority, handler, timeout);
+    }
 };
 
 int ProxyPrefixFs::level = 0;
