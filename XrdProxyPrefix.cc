@@ -6,8 +6,8 @@
  *                  copied verbatim in the file "LICENSE" *
  ********************************************************************************/
 
-#include "XrdCl/XrdClUtils.hh"
 #include "XrdProxyPrefix.hh"
+#include "XrdCl/XrdClUtils.hh"
 #include <assert.h>
 #include <cstdlib>
 #include <exception>
@@ -35,6 +35,8 @@ class ProxyPrefixFile : public XrdCl::FilePlugIn {
         XrdCl::Log* log = XrdCl::DefaultEnv::GetLog();
         XrdCl::URL xUrl(url);
         std::string ppc = proxyPrefix;
+        if (xUrl.getProtocol().compare("file") == 0)
+            return url;
         std::string newurl = std::string(xUrl.GetProtocol()).append(std::string(ppc)).append(url);
         std::stringstream out;
         out << "XrdProxyPrefix::setting  url:\"" << url << " to: " << newurl << "\"" << std::endl;
