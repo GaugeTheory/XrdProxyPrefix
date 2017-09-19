@@ -6,8 +6,8 @@
  *                  copied verbatim in the file "LICENSE" *
  ********************************************************************************/
 
-#include "XrdProxyPrefix.hh"
 #include "XrdCl/XrdClUtils.hh"
+#include "XrdProxyPrefix.hh"
 #include <assert.h>
 #include <cstdlib>
 #include <exception>
@@ -152,7 +152,7 @@ class ProxyPrefixFs : public XrdCl::FileSystemPlugIn {
             return xfs.Rm(prepURL(path), handler, timeout);
         return xfs.Rm(path, handler, timeout);
     }
-    virtual XRootDStatus MkDir(const std::string& path, MkDirdags::Flags flags, Access::Mode mode,
+    virtual XRootDStatus MkDir(const std::string& path, MkDirFlags::Flags flags, Access::Mode mode,
                                ResponseHandler* handler, uint16_t timeout) {
         XrdCl::Log* log = XrdCl::DefaultEnv::GetLog();
         log->Debug(1, "ProxyPrefixFs::MkDir");
@@ -230,7 +230,7 @@ class ProxyPrefixFs : public XrdCl::FileSystemPlugIn {
         if (mylevel == 0) {
             std::vector<std::string> newList;
             for (auto it : fileList)
-                newList.pushback(prepURL(it));
+                newList.push_back(prepURL(it));
             return xfs.Prepare(newList, flags, priority, handler, timeout);
         }
         return xfs.Prepare(fileList, flags, priority, handler, timeout);
@@ -240,7 +240,7 @@ class ProxyPrefixFs : public XrdCl::FileSystemPlugIn {
 int ProxyPrefixFs::level = 0;
 std::string ProxyPrefixFs::proxyPrefix = "UNSET";
 XrdCl::URL ProxyPrefixFs::targetURL;
-}
+} // namespace ProxyPrefix
 namespace PPFactory {
 
 void ProxyPrefixFactory::loadDefaultConf(std::map<std::string, std::string>& config) {
@@ -324,7 +324,7 @@ XrdCl::FileSystemPlugIn* ProxyPrefixFactory::CreateFileSystem(const std::string&
     log->Debug(1, "ProxyPreficFactory::CreateFilesys");
     return static_cast<XrdCl::FileSystemPlugIn*>(new ProxyPrefix::ProxyPrefixFs(url));
 }
-}
+} // namespace PPFactory
 extern "C" {
 
 void* XrdClGetPlugIn(const void* arg) {
