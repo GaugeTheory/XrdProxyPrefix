@@ -37,7 +37,7 @@ class ProxyPrefixFile : public XrdCl::FilePlugIn {
         std::string ppc = proxyPrefix;
         if (xUrl.GetProtocol().compare("file") == 0)
             return url;
-        std::string newurl = std::string(xUrl.GetProtocol()).append(std::string(ppc)).append(url);
+        std::string newurl = std::string(xUrl.GetProtocol()).append(std::string(ppc)).append(std::string(xUrl.GetPath()));
         std::stringstream out;
         out << "XrdProxyPrefix::setting  url:\"" << url << " to: " << newurl << "\"" << std::endl;
         log->Debug(1, out.str().c_str());

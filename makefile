@@ -10,7 +10,7 @@ all:XrdOpenLocal.so
  	
 XrdOpenLocal.so: 
 	g++ -g3 -fPIC  -I$(XRD_PATH)/include/xrootd  -I./src/ -c *.cc -std=c++11
-	g++ -shared  -L$(XRD_PATH)/lib -Wl,-soname,XrdProxyPrefix.so.1,--export-dynamic -o XrdProxyPrefix.so *.o -lXrdUtils -lXrdCl
+	g++ -shared  -L$(XRD_PATH)/lib64 -Wl,-soname,XrdProxyPrefix.so.1,--export-dynamic -o XrdProxyPrefix.so *.o -lXrdUtils -lXrdCl
 	
 test: XrdOpenLocal.so
 	@./test/xrdcp_DEFAULT.sh $(DBG)
